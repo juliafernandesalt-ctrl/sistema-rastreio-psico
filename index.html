@@ -6,4 +6,164 @@
 <title>Painel — Julia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,500;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<sty
+<style>
+  :root {
+    --roxo-profundo: #6B4E8E;
+    --roxo-medio: #8F6BAE;
+    --roxo-violeta: #A76BC0;
+    --lilas-claro: #F3EAF8;
+    --quase-branco: #FBF7FD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--quase-branco);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    color: var(--roxo-profundo);
+    min-height: 100vh;
+  }
+  header { padding: 48px 24px 24px; text-align: center; }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 2.2rem;
+    margin: 0 0 6px;
+    color: var(--roxo-profundo);
+  }
+  header p { margin: 0; font-weight: 300; color: var(--roxo-medio); letter-spacing: 0.03em; }
+  nav { display: flex; justify-content: center; gap: 10px; padding: 0 24px 32px; flex-wrap: wrap; }
+  nav button {
+    font-family: 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 0.9rem;
+    border: 1px solid var(--roxo-violeta);
+    background: transparent;
+    color: var(--roxo-profundo);
+    padding: 9px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  nav button.ativo { background: var(--roxo-profundo); color: var(--quase-branco); border-color: var(--roxo-profundo); }
+  nav button.em-breve { opacity: 0.45; cursor: default; border-style: dashed; }
+  main { max-width: 900px; margin: 0 auto; padding: 0 24px 80px; }
+  #status-msg { text-align: center; color: var(--roxo-medio); font-size: 0.95rem; padding: 40px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+  .card {
+    background: #ffffff;
+    border: 1px solid var(--lilas-claro);
+    border-radius: 16px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 4px 18px rgba(107, 78, 142, 0.06);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(107, 78, 142, 0.12); }
+  .card-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .badge {
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .badge-reel { background: #F3EAF8; color: #6B4E8E; }
+  .badge-carrossel { background: #EFE3F5; color: #7A4E9E; }
+  .badge-story { background: #E7D6F0; color: #5C3D7D; }
+  .card h3 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin: 0;
+    line-height: 1.35;
+    color: var(--roxo-profundo);
+  }
+  .card .tema { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--roxo-violeta); font-weight: 400; }
+  .card p.desc { font-size: 0.92rem; line-height: 1.5; color: #5a4a68; margin: 0; font-weight: 300; }
+  .card-rodape {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--lilas-claro);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    color: var(--roxo-medio);
+  }
+  .card-rodape a { color: var(--roxo-profundo); text-decoration: none; font-weight: 500; }
+  .card-rodape a:hover { text-decoration: underline; }
+  footer { text-align: center; padding: 30px 20px 50px; font-size: 0.75rem; color: var(--roxo-violeta); opacity: 0.7; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Painel de conteúdo</h1>
+  <p>@juliaalt.psi</p>
+</header>
+
+<nav>
+  <button class="ativo" data-aba="radar">Radar de Conteúdo</button>
+  <button class="em-breve" disabled>Ebook (em breve)</button>
+  <button class="em-breve" disabled>Tarefas (em breve)</button>
+</nav>
+
+<main>
+  <div id="status-msg">Carregando pautas...</div>
+  <div class="grid" id="grid-pautas"></div>
+</main>
+
+<footer>Atualizado automaticamente toda semana</footer>
+
+<script>
+  const SUPABASE_URL = "https://pjzxanenyizhfvckgogz.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_iWwjCsIcS7gedbY7MsTFJQ_l1_9TcPS";
+
+  const badgeClasse = { reel: "badge-reel", carrossel: "badge-carrossel", story: "badge-story" };
+
+  async function carregarPautas() {
+    const statusMsg = document.getElementById("status-msg");
+    const grid = document.getElementById("grid-pautas");
+    try {
+      const resposta = await fetch(
+        `${SUPABASE_URL}/rest/v1/pautas_conteudo?select=*&order=created_at.desc`,
+        { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+      );
+      if (!resposta.ok) throw new Error("Não consegui buscar os dados (" + resposta.status + ")");
+      const pautas = await resposta.json();
+      if (pautas.length === 0) {
+        statusMsg.textContent = "Nenhuma pauta ainda. Assim que a rotina semanal rodar, elas aparecem aqui.";
+        return;
+      }
+      statusMsg.style.display = "none";
+      grid.innerHTML = pautas.map((p) => `
+        <div class="card">
+          <div class="card-topo">
+            <span class="tema">${p.tema ?? ""}</span>
+            <span class="badge ${badgeClasse[p.formato] ?? "badge-reel"}">${p.formato ?? ""}</span>
+          </div>
+          <h3>${p.titulo ?? ""}</h3>
+          <p class="desc">${p.descricao ?? ""}</p>
+          <div class="card-rodape">
+            <span>${p.fonte ?? ""}</span>
+            ${p.link_referencia ? `<a href="${p.link_referencia}" target="_blank" rel="noopener">ver fonte →</a>` : ""}
+          </div>
+        </div>
+      `).join("");
+    } catch (erro) {
+      statusMsg.textContent = "Algo deu errado ao carregar: " + erro.message;
+    }
+  }
+  carregarPautas();
+</script>
+
+</body>
+</html>
