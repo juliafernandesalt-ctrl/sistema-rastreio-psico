@@ -134,8 +134,7 @@
     const grid = document.getElementById("grid-pautas");
     try {
       const resposta = await fetch(
-        `${SUPABASE_URL}/rest/v1/pautas_conteudo?select=*&order=created_at.desc`,
-        { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+        `${SUPABASE_URL}/rest/v1/pautas_conteudo?select=*&order=created_at.desc&apikey=${SUPABASE_KEY}`
       );
       if (!resposta.ok) throw new Error("Não consegui buscar os dados (" + resposta.status + ")");
       const pautas = await resposta.json();
