@@ -1,5 +1,7 @@
+
 import os
 import json
+import re
 import requests
 from datetime import datetime
 
@@ -17,16 +19,18 @@ Pesquise na web por conteúdos, temas e formatos em alta AGORA sobre:
 - Livros de psicologia populares ou comentados recentemente
 - Formatos de Reels e carrosséis performando bem em contas de psicologia
 
-Retorne EXATAMENTE 8 pautas de conteúdo, cada uma com estes campos, em formato JSON (lista de objetos):
+Retorne EXATAMENTE 6 pautas de conteúdo (não mais que isso), cada uma com estes campos,
+em formato JSON (lista de objetos):
 - titulo: título curto e chamativo
 - tema: assunto principal
-- descricao: 2 a 3 frases explicando a ideia e o ângulo do conteúdo
+- descricao: 1 a 2 frases curtas explicando a ideia e o ângulo do conteúdo
 - formato: "reel", "carrossel" ou "story"
 - fonte: de onde veio a referência (perfil, site, etc)
 - link_referencia: link da fonte, se houver
 - status: sempre "novo"
 
-Responda APENAS com o JSON válido, sem texto antes ou depois, sem markdown.
+Seja direta e objetiva nas descrições. Responda APENAS com o JSON válido,
+sem texto antes ou depois, sem markdown, sem explicações.
 """
 
 def buscar_pautas():
@@ -39,26 +43,28 @@ def buscar_pautas():
         },
         json={
             "model": "claude-sonnet-5",
-            "max_tokens": 4096,
-            "tools": [{"type": "web_search_20250305", "name": "web_search", "max_uses": 8}],
+            "max_tokens": 8192,
+            "tools": [{"type": "web_search_20250305", "name": "web_search", "max_uses": 5}],
             "messages": [{"role": "user", "content": PROMPT}],
         },
-        timeout=120,
+        timeout=180,
     )
     response.raise_for_status()
     data = response.json()
+
+    print(f"Motivo de parada: {data.get('stop_reason')}")
 
     texto_completo = "".join(
         bloco["text"] for bloco in data["content"] if bloco["type"] == "text"
     )
 
-    texto_limpo = texto_completo.strip()
-    if texto_limpo.startswith("```"):
-        texto_limpo = texto_limpo.split("```")[1]
-        if texto_limpo.startswith("json"):
-            texto_limpo = texto_limpo[4:]
+    match = re.search(r"\[.*\]", texto_completo, re.DOTALL)
+    if not match:
+        print("Resposta recebida (sem JSON encontrado):")
+        print(texto_completo)
+        raise ValueError("Não encontrei uma lista JSON na resposta da IA.")
 
-    return json.loads(texto_limpo)
+    return json.loads(match.group(0))
 
 
 def salvar_no_supabase(pautas):
