@@ -155,12 +155,13 @@
     flex-direction: column;
     gap: 10px;
     box-shadow: 0 4px 18px rgba(107, 78, 142, 0.06);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease;
     position: relative;
   }
   .card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(107, 78, 142, 0.12); }
   .card.minha { border: 1px solid var(--roxo-violeta); }
   .card.feito { opacity: 0.6; }
+  .card.saindo { opacity: 0; transform: scale(0.96); }
   .selo-minha {
     position: absolute;
     top: -9px;
@@ -211,6 +212,13 @@
   .card-rodape a { color: var(--roxo-profundo); text-decoration: none; font-weight: 500; }
   .card-rodape a:hover { text-decoration: underline; }
 
+  .linha-acoes {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
   .status-btn {
     display: inline-flex;
     align-items: center;
@@ -222,12 +230,21 @@
     font-size: 0.75rem;
     cursor: pointer;
     color: var(--roxo-profundo);
-    align-self: flex-start;
   }
   .status-btn .bolinha { width: 8px; height: 8px; border-radius: 50%; background: #b9a8c9; }
   .status-btn.novo .bolinha { background: #A76BC0; }
   .status-btn.em-producao .bolinha { background: #E0A548; }
   .status-btn.feito .bolinha { background: #4a9a63; }
+
+  .btn-descartar {
+    border: none;
+    background: transparent;
+    color: #b08a8a;
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 5px 8px;
+  }
+  .btn-descartar:hover { color: #a34a4a; text-decoration: underline; }
 
   footer { text-align: center; padding: 30px 20px 50px; font-size: 0.75rem; color: var(--roxo-violeta); opacity: 0.7; }
 </style>
@@ -323,7 +340,7 @@
       const ehMinha = p.fonte === "Julia (ideia própria)";
       const status = p.status && rotuloStatus[p.status] ? p.status : "novo";
       return `
-        <div class="card ${ehMinha ? "minha" : ""} ${status === "feito" ? "feito" : ""}">
+        <div class="card ${ehMinha ? "minha" : ""} ${status === "feito" ? "feito" : ""}" data-card-id="${p.id}">
           ${ehMinha ? '<span class="selo-minha">Minha ideia</span>' : ""}
           <div class="card-topo">
             <span class="tema">${p.tema ?? ""}</span>
@@ -331,9 +348,12 @@
           </div>
           <h3>${p.titulo ?? ""}</h3>
           <p class="desc">${p.descricao ?? ""}</p>
-          <button class="status-btn ${status}" data-id="${p.id}" data-status="${status}">
-            <span class="bolinha"></span> ${rotuloStatus[status]}
-          </button>
+          <div class="linha-acoes">
+            <button class="status-btn ${status}" data-id="${p.id}" data-status="${status}">
+              <span class="bolinha"></span> ${rotuloStatus[status]}
+            </button>
+            <button class="btn-descartar" data-id="${p.id}">Descartar</button>
+          </div>
           <div class="card-rodape">
             <span>${p.fonte ?? ""}</span>
             ${p.link_referencia ? `<a href="${p.link_referencia}" target="_blank" rel="noopener">ver fonte →</a>` : ""}
@@ -366,13 +386,37 @@
         }
       });
     });
+
+    document.querySelectorAll(".btn-descartar").forEach((botao) => {
+      botao.addEventListener("click", async () => {
+        const id = botao.dataset.id;
+        botao.disabled = true;
+        const card = document.querySelector(`[data-card-id="${id}"]`);
+        try {
+          const resposta = await fetch(
+            `${SUPABASE_URL}/rest/v1/pautas_conteudo?id=eq.${id}&apikey=${SUPABASE_KEY}`,
+            {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json", "Prefer": "return=minimal" },
+              body: JSON.stringify({ status: "descartado" }),
+            }
+          );
+          if (!resposta.ok) throw new Error();
+          if (card) card.classList.add("saindo");
+          todasAsPautas = todasAsPautas.filter((p) => String(p.id) !== String(id));
+          setTimeout(renderizarCards, 180);
+        } catch {
+          botao.disabled = false;
+        }
+      });
+    });
   }
 
   async function carregarPautas() {
     const statusMsg = document.getElementById("status-msg");
     try {
       const resposta = await fetch(
-        `${SUPABASE_URL}/rest/v1/pautas_conteudo?select=*&order=created_at.desc&apikey=${SUPABASE_KEY}`
+        `${SUPABASE_URL}/rest/v1/pautas_conteudo?select=*&status=neq.descartado&order=created_at.desc&apikey=${SUPABASE_KEY}`
       );
       if (!resposta.ok) throw new Error("Não consegui buscar os dados (" + resposta.status + ")");
       const pautas = await resposta.json();
