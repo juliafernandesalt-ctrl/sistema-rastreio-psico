@@ -8,7 +8,34 @@ ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_KEY"]
 
-PROMPT = """
+
+def buscar_descartes_recentes():
+    """Pega os últimos temas/títulos que Julia descartou, pra evitar repetir o padrão."""
+    url = (
+        f"{SUPABASE_URL}/rest/v1/pautas_conteudo"
+        f"?select=titulo,tema&status=eq.descartado&order=created_at.desc&limit=20"
+        f"&apikey={SUPABASE_KEY}"
+    )
+    response = requests.get(url, timeout=30)
+    if not response.ok:
+        return []
+    return response.json()
+
+
+def montar_prompt(descartes):
+    bloco_descartes = ""
+    if descartes:
+        linhas = "\n".join(f'- "{d["titulo"]}" (tema: {d["tema"]})' for d in descartes)
+        bloco_descartes = f"""
+IMPORTANTE — Julia já descartou estas pautas em semanas anteriores, porque não gostou
+do ângulo, tema ou estilo delas. NÃO repita temas ou abordagens parecidas com estas:
+{linhas}
+
+Aprenda com esse padrão de rejeição: evite temas, ângulos ou formatos semelhantes aos
+descartados acima, e prefira variações claramente diferentes.
+"""
+
+    return f"""
 Você é um assistente de pesquisa de conteúdo para uma criadora de conteúdo no Instagram
 (@juliaalt.psi), cujo público é ESTUDANTES DE PSICOLOGIA.
 
@@ -33,7 +60,7 @@ Regras importantes:
 - Varie também os formatos entre as 6 pautas: não traga todas do mesmo tipo
   (por exemplo, misture pelo menos um meme, um vlog/reel de rotina e um carrossel
   educativo, não só carrosséis de burocracia acadêmica).
-
+{bloco_descartes}
 Retorne EXATAMENTE 6 pautas de conteúdo, cada uma com estes campos, em formato JSON
 (lista de objetos):
 - titulo: título curto e chamativo
@@ -48,7 +75,13 @@ Seja direta e objetiva nas descrições. Responda APENAS com o JSON válido,
 sem texto antes ou depois, sem markdown, sem explicações.
 """
 
+
 def buscar_pautas():
+    descartes = buscar_descartes_recentes()
+    print(f"Descartes considerados: {len(descartes)}")
+
+    prompt = montar_prompt(descartes)
+
     response = requests.post(
         "https://api.anthropic.com/v1/messages",
         headers={
@@ -60,7 +93,7 @@ def buscar_pautas():
             "model": "claude-sonnet-5",
             "max_tokens": 8192,
             "tools": [{"type": "web_search_20250305", "name": "web_search", "max_uses": 8}],
-            "messages": [{"role": "user", "content": PROMPT}],
+            "messages": [{"role": "user", "content": prompt}],
         },
         timeout=180,
     )
