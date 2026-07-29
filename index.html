@@ -33,7 +33,7 @@
     color: var(--roxo-profundo);
   }
   header p { margin: 0; font-weight: 300; color: var(--roxo-medio); letter-spacing: 0.03em; }
-  nav { display: flex; justify-content: center; gap: 10px; padding: 0 24px 32px; flex-wrap: wrap; }
+  nav { display: flex; justify-content: center; gap: 10px; padding: 0 24px 24px; flex-wrap: wrap; }
   nav button {
     font-family: 'Jost', sans-serif;
     font-weight: 400;
@@ -48,7 +48,102 @@
   }
   nav button.ativo { background: var(--roxo-profundo); color: var(--quase-branco); border-color: var(--roxo-profundo); }
   nav button.em-breve { opacity: 0.45; cursor: default; border-style: dashed; }
+
+  .filtros {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 24px 28px;
+    flex-wrap: wrap;
+  }
+  .filtros button {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.82rem;
+    border: 1px solid var(--lilas-claro);
+    background: #fff;
+    color: var(--roxo-medio);
+    padding: 6px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .filtros button.ativo { background: var(--lilas-claro); color: var(--roxo-profundo); font-weight: 500; border-color: var(--roxo-violeta); }
+
   main { max-width: 900px; margin: 0 auto; padding: 0 24px 80px; }
+
+  .caixa-nova-ideia {
+    background: #ffffff;
+    border: 1px solid var(--lilas-claro);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 18px rgba(107, 78, 142, 0.06);
+  }
+  .caixa-nova-ideia summary {
+    cursor: pointer;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.05rem;
+    color: var(--roxo-profundo);
+    list-style: none;
+  }
+  .caixa-nova-ideia summary::-webkit-details-marker { display: none; }
+  .caixa-nova-ideia summary::before { content: "+ "; }
+  .caixa-nova-ideia[open] summary::before { content: "− "; }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .form-grid .full { grid-column: 1 / -1; }
+
+  .caixa-nova-ideia label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--roxo-medio);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .caixa-nova-ideia input,
+  .caixa-nova-ideia select,
+  .caixa-nova-ideia textarea {
+    width: 100%;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.92rem;
+    padding: 9px 12px;
+    border: 1px solid var(--lilas-claro);
+    border-radius: 10px;
+    color: var(--roxo-profundo);
+    background: var(--quase-branco);
+  }
+
+  .caixa-nova-ideia textarea { resize: vertical; min-height: 60px; }
+
+  .btn-salvar-ideia {
+    margin-top: 14px;
+    background: var(--roxo-profundo);
+    color: var(--quase-branco);
+    border: none;
+    padding: 10px 22px;
+    border-radius: 999px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .btn-salvar-ideia:hover { background: var(--roxo-violeta); }
+
+  .feedback-form {
+    font-size: 0.82rem;
+    margin-top: 10px;
+    min-height: 18px;
+  }
+  .feedback-form.ok { color: #4a7a52; }
+  .feedback-form.erro { color: #a34a4a; }
+
   #status-msg { text-align: center; color: var(--roxo-medio); font-size: 0.95rem; padding: 40px 0; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
   .card {
@@ -61,8 +156,23 @@
     gap: 10px;
     box-shadow: 0 4px 18px rgba(107, 78, 142, 0.06);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
+    position: relative;
   }
   .card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(107, 78, 142, 0.12); }
+  .card.minha { border: 1px solid var(--roxo-violeta); }
+  .card.feito { opacity: 0.6; }
+  .selo-minha {
+    position: absolute;
+    top: -9px;
+    right: 16px;
+    background: var(--roxo-violeta);
+    color: #fff;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
   .card-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
   .badge {
     font-size: 0.68rem;
@@ -100,6 +210,25 @@
   }
   .card-rodape a { color: var(--roxo-profundo); text-decoration: none; font-weight: 500; }
   .card-rodape a:hover { text-decoration: underline; }
+
+  .status-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--lilas-claro);
+    background: var(--quase-branco);
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    color: var(--roxo-profundo);
+    align-self: flex-start;
+  }
+  .status-btn .bolinha { width: 8px; height: 8px; border-radius: 50%; background: #b9a8c9; }
+  .status-btn.novo .bolinha { background: #A76BC0; }
+  .status-btn.em-producao .bolinha { background: #E0A548; }
+  .status-btn.feito .bolinha { background: #4a9a63; }
+
   footer { text-align: center; padding: 30px 20px 50px; font-size: 0.75rem; color: var(--roxo-violeta); opacity: 0.7; }
 </style>
 </head>
@@ -116,7 +245,49 @@
   <button class="em-breve" disabled>Tarefas (em breve)</button>
 </nav>
 
+<div class="filtros" id="filtros">
+  <button class="ativo" data-filtro="todos">Todos</button>
+  <button data-filtro="reel">Reels</button>
+  <button data-filtro="carrossel">Carrossel</button>
+  <button data-filtro="story">Story</button>
+</div>
+
 <main>
+
+  <details class="caixa-nova-ideia">
+    <summary>Adicionar minha própria ideia</summary>
+    <form id="form-ideia">
+      <div class="form-grid">
+        <div class="full">
+          <label for="f-titulo">Título</label>
+          <input id="f-titulo" required maxlength="120" />
+        </div>
+        <div>
+          <label for="f-tema">Tema</label>
+          <input id="f-tema" required maxlength="120" />
+        </div>
+        <div>
+          <label for="f-formato">Formato</label>
+          <select id="f-formato">
+            <option value="reel">Reel</option>
+            <option value="carrossel">Carrossel</option>
+            <option value="story">Story</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="f-descricao">Descrição</label>
+          <textarea id="f-descricao" required maxlength="400"></textarea>
+        </div>
+        <div class="full">
+          <label for="f-link">Link de referência (opcional)</label>
+          <input id="f-link" type="url" />
+        </div>
+      </div>
+      <button type="submit" class="btn-salvar-ideia">Salvar ideia</button>
+      <div id="feedback-form" class="feedback-form"></div>
+    </form>
+  </details>
+
   <div id="status-msg">Carregando pautas...</div>
   <div class="grid" id="grid-pautas"></div>
 </main>
@@ -128,10 +299,77 @@
   const SUPABASE_KEY = "sb_publishable_iWwjCsIcS7gedbY7MsTFJQ_l1_9TcPS";
 
   const badgeClasse = { reel: "badge-reel", carrossel: "badge-carrossel", story: "badge-story" };
+  const proximoStatus = { novo: "em-producao", "em-producao": "feito", feito: "novo" };
+  const rotuloStatus = { novo: "Novo", "em-producao": "Em produção", feito: "Feito" };
+
+  let todasAsPautas = [];
+  let filtroAtual = "todos";
+
+  function renderizarCards() {
+    const grid = document.getElementById("grid-pautas");
+    const pautasFiltradas = filtroAtual === "todos"
+      ? todasAsPautas
+      : todasAsPautas.filter((p) => p.formato === filtroAtual);
+
+    if (pautasFiltradas.length === 0) {
+      grid.innerHTML = "";
+      document.getElementById("status-msg").style.display = "block";
+      document.getElementById("status-msg").textContent = "Nenhuma pauta nesse filtro ainda.";
+      return;
+    }
+    document.getElementById("status-msg").style.display = "none";
+
+    grid.innerHTML = pautasFiltradas.map((p) => {
+      const ehMinha = p.fonte === "Julia (ideia própria)";
+      const status = p.status && rotuloStatus[p.status] ? p.status : "novo";
+      return `
+        <div class="card ${ehMinha ? "minha" : ""} ${status === "feito" ? "feito" : ""}">
+          ${ehMinha ? '<span class="selo-minha">Minha ideia</span>' : ""}
+          <div class="card-topo">
+            <span class="tema">${p.tema ?? ""}</span>
+            <span class="badge ${badgeClasse[p.formato] ?? "badge-reel"}">${p.formato ?? ""}</span>
+          </div>
+          <h3>${p.titulo ?? ""}</h3>
+          <p class="desc">${p.descricao ?? ""}</p>
+          <button class="status-btn ${status}" data-id="${p.id}" data-status="${status}">
+            <span class="bolinha"></span> ${rotuloStatus[status]}
+          </button>
+          <div class="card-rodape">
+            <span>${p.fonte ?? ""}</span>
+            ${p.link_referencia ? `<a href="${p.link_referencia}" target="_blank" rel="noopener">ver fonte →</a>` : ""}
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    document.querySelectorAll(".status-btn").forEach((botao) => {
+      botao.addEventListener("click", async () => {
+        const id = botao.dataset.id;
+        const statusAtual = botao.dataset.status;
+        const novoStatus = proximoStatus[statusAtual];
+        botao.disabled = true;
+        try {
+          const resposta = await fetch(
+            `${SUPABASE_URL}/rest/v1/pautas_conteudo?id=eq.${id}&apikey=${SUPABASE_KEY}`,
+            {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json", "Prefer": "return=minimal" },
+              body: JSON.stringify({ status: novoStatus }),
+            }
+          );
+          if (!resposta.ok) throw new Error();
+          const pauta = todasAsPautas.find((p) => String(p.id) === String(id));
+          if (pauta) pauta.status = novoStatus;
+          renderizarCards();
+        } catch {
+          botao.disabled = false;
+        }
+      });
+    });
+  }
 
   async function carregarPautas() {
     const statusMsg = document.getElementById("status-msg");
-    const grid = document.getElementById("grid-pautas");
     try {
       const resposta = await fetch(
         `${SUPABASE_URL}/rest/v1/pautas_conteudo?select=*&order=created_at.desc&apikey=${SUPABASE_KEY}`
@@ -142,25 +380,59 @@
         statusMsg.textContent = "Nenhuma pauta ainda. Assim que a rotina semanal rodar, elas aparecem aqui.";
         return;
       }
-      statusMsg.style.display = "none";
-      grid.innerHTML = pautas.map((p) => `
-        <div class="card">
-          <div class="card-topo">
-            <span class="tema">${p.tema ?? ""}</span>
-            <span class="badge ${badgeClasse[p.formato] ?? "badge-reel"}">${p.formato ?? ""}</span>
-          </div>
-          <h3>${p.titulo ?? ""}</h3>
-          <p class="desc">${p.descricao ?? ""}</p>
-          <div class="card-rodape">
-            <span>${p.fonte ?? ""}</span>
-            ${p.link_referencia ? `<a href="${p.link_referencia}" target="_blank" rel="noopener">ver fonte →</a>` : ""}
-          </div>
-        </div>
-      `).join("");
+      todasAsPautas = pautas;
+      renderizarCards();
     } catch (erro) {
       statusMsg.textContent = "Algo deu errado ao carregar: " + erro.message;
     }
   }
+
+  document.getElementById("filtros").addEventListener("click", (evento) => {
+    const botao = evento.target.closest("button[data-filtro]");
+    if (!botao) return;
+    filtroAtual = botao.dataset.filtro;
+    document.querySelectorAll("#filtros button").forEach((b) => b.classList.remove("ativo"));
+    botao.classList.add("ativo");
+    renderizarCards();
+  });
+
+  document.getElementById("form-ideia").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const feedback = document.getElementById("feedback-form");
+    feedback.textContent = "Salvando...";
+    feedback.className = "feedback-form";
+
+    const novaIdeia = {
+      titulo: document.getElementById("f-titulo").value,
+      tema: document.getElementById("f-tema").value,
+      descricao: document.getElementById("f-descricao").value,
+      formato: document.getElementById("f-formato").value,
+      fonte: "Julia (ideia própria)",
+      link_referencia: document.getElementById("f-link").value || null,
+      status: "novo",
+    };
+
+    try {
+      const resposta = await fetch(
+        `${SUPABASE_URL}/rest/v1/pautas_conteudo?apikey=${SUPABASE_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Prefer": "return=minimal" },
+          body: JSON.stringify(novaIdeia),
+        }
+      );
+      if (!resposta.ok) throw new Error("Não consegui salvar (" + resposta.status + ")");
+
+      feedback.textContent = "Ideia salva!";
+      feedback.className = "feedback-form ok";
+      document.getElementById("form-ideia").reset();
+      carregarPautas();
+    } catch (erro) {
+      feedback.textContent = "Algo deu errado: " + erro.message;
+      feedback.className = "feedback-form erro";
+    }
+  });
+
   carregarPautas();
 </script>
 
