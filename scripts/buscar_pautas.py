@@ -1,4 +1,3 @@
-
 import os
 import json
 import re
@@ -10,22 +9,33 @@ SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_KEY"]
 
 PROMPT = """
-Você é um assistente de pesquisa de conteúdo para uma criadora de conteúdo sobre psicologia,
-voltada para estudantes de psicologia, vida acadêmica e curiosidades da área.
+Você é um assistente de pesquisa de conteúdo para uma criadora de conteúdo no Instagram
+(@juliaalt.psi), cujo público é especificamente ESTUDANTES DE PSICOLOGIA.
 
-Pesquise na web por conteúdos, temas e formatos em alta AGORA sobre:
-- Psicologia (temas, teorias, curiosidades que estão viralizando)
-- Vida acadêmica de estudantes de psicologia
-- Livros de psicologia populares ou comentados recentemente
-- Formatos de Reels e carrosséis performando bem em contas de psicologia
+Seu foco é redes sociais, não blogs ou artigos de site. Pesquise ativamente em:
+- Instagram (Reels, carrosséis, posts de contas de psicologia/estudantes de psicologia)
+- TikTok (vídeos e trends sobre psicologia e vida acadêmica)
 
-Retorne EXATAMENTE 6 pautas de conteúdo (não mais que isso), cada uma com estes campos,
-em formato JSON (lista de objetos):
+Formule buscas específicas incluindo termos como "instagram", "reels", "tiktok" e o ano atual,
+por exemplo: "estudantes de psicologia instagram reels tendência 2026",
+"psicologia tiktok trend 2026", "carrossel psicologia instagram viral".
+
+Regras importantes:
+- IGNORE resultados de blogs, sites de notícias genéricos ou artigos de SEO antigos.
+- IGNORE qualquer conteúdo com mais de 3 meses de idade. Se não tiver certeza da data,
+  prefira descartar a fazer pautas com conteúdo desatualizado.
+- Priorize o que está sendo postado e comentado NAS PRÓPRIAS REDES agora, não o que
+  aparece em listas de blog sobre "tendências de psicologia".
+- O nicho é estudantes de psicologia especificamente (rotina de faculdade, estágio, TCC,
+  vida acadêmica, curiosidades da área) — não psicologia genérica pra público leigo.
+
+Retorne EXATAMENTE 6 pautas de conteúdo, cada uma com estes campos, em formato JSON
+(lista de objetos):
 - titulo: título curto e chamativo
 - tema: assunto principal
 - descricao: 1 a 2 frases curtas explicando a ideia e o ângulo do conteúdo
 - formato: "reel", "carrossel" ou "story"
-- fonte: de onde veio a referência (perfil, site, etc)
+- fonte: de onde veio a referência (perfil do Instagram/TikTok, nome da conta, etc — não site genérico)
 - link_referencia: link da fonte, se houver
 - status: sempre "novo"
 
@@ -44,7 +54,7 @@ def buscar_pautas():
         json={
             "model": "claude-sonnet-5",
             "max_tokens": 8192,
-            "tools": [{"type": "web_search_20250305", "name": "web_search", "max_uses": 5}],
+            "tools": [{"type": "web_search_20250305", "name": "web_search", "max_uses": 8}],
             "messages": [{"role": "user", "content": PROMPT}],
         },
         timeout=180,
